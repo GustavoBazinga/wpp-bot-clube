@@ -29,31 +29,25 @@ client.on('message', async msg => {
     const sessao = ListaSessao.checarSessaoExisteECriar(listaSessoes, remetente);
 
     if (msg.body == "!start") {
-      sessao.iniciarFormulario();
-      client.sendMessage(remetente, "Olá, seja bem vindo ao bot de solicitações de serviços do Clube dos Funcionários da CSN.");    
+      sessao.started = true;
+      client.sendMessage(remetente, "Olá, seja bem vindo ao bot de solicitações de serviços do Clube dos Funcionários da CSN.\nPara começar, digite !solicitacao");    
     }
-      
+    if (sessao.started){
 
-    if (sessao.formulario != null){
-      if(sessao.formulario.aguardandoResposta) {
-        const validacao = sessao.formulario.responder(msg.body);
-        if (validacao.valido) {
-          sessao.formulario.aguardandoResposta = false;
-          if (!sessao.formulario.isCompletado) {
-            sessao.formulario.perguntar(client);
-          }
+      if (msg.body == "!solicitacao") {
+        if (sessao.formulario == null) {
+          sessao.iniciarFormulario("solicitacao", remetente, client);
         }
-        else client.sendMessage(remetente, validacao.mensagem);
       }
-      else sessao.formulario.perguntar(client);
-      if (sessao.formulario.isCompletado){
-        sessao.formulario.salvarExcel(sessao.formulario.respostas);
-        client.sendMessage(remetente, "Obrigado por responder o formulário, em breve entraremos em contato.");
 
-        sessao.formulario = null;
-        listaSessoes.removeSessao(sessao);
+      if (sessao.formulario != null){
+        if(sessao.formulario.aguardandoResposta){
+          sessao.formulario.responder(msg.body);
+          sessao.formulario.perguntar(client);
+        }
+        
       }
     }
-});
-
+  });
+  
 client.initialize();

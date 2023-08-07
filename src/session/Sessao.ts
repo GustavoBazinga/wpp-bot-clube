@@ -1,27 +1,31 @@
-import {FormularioSolicitacao} from "./FormularioSolicitacao";
+// import {FormularioSolicitacao} from "./FormularioSolicitacao";
 import Formulario from "./Formulario";
 
 export default class Sessao{
     // Atributos
     public id: string;
+    public started: boolean = false;
     //Nome tem dois campos, nome e validado
+    public conversa: Array<string> = new Array<string>();
+
+
 
     public formulario: Formulario = null;
     
     constructor(id: string) {
         this.id = id;
+
     }
 
     // Metodos
-    public iniciarFormulario(): void{
-        this.formulario = new FormularioSolicitacao(this.id);
-        this.formulario.iniciar();
+    public iniciarFormulario(type:string, number:string, client: any): void{
+        fetch(`http://localhost:3001/form/${type}`)
+            .then(res => res.json())
+            .then(json => {
+                const form = new Formulario(json, number);
+                this.formulario = form;
+                this.formulario.perguntar(client, true)
+            })
     }
-
-    public isFormularioIniciado(): boolean{
-        return this.formulario.isIniciado;
-    }
-
-
     
 }
