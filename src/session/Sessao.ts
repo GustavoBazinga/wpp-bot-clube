@@ -1,4 +1,4 @@
-// import {FormularioSolicitacao} from "./FormularioSolicitacao";
+/* import {FormularioSolicitacao} from "./FormularioSolicitacao"; */
 import Formulario from "./Formulario";
 
 export default class Sessao{
@@ -22,9 +22,8 @@ export default class Sessao{
         fetch(`http://localhost:3001/form/${type}`)
             .then(res => res.json())
             .then(json => {
-                const form = new Formulario(json, number);
-                this.formulario = form;
-                this.formulario.perguntar(client, true)
+                this.formulario = new Formulario(json, number);
+                this.formulario.perguntar(client)
             })
     }
     

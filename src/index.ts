@@ -1,7 +1,6 @@
 import qrcode from 'qrcode-terminal';
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import ListaSessao  from './session/ListaSessao';
-import Sessao from './session/Sessao';
 
 const listaSessoes = new ListaSessao();
 
@@ -30,7 +29,7 @@ client.on('message', async msg => {
 
     if (msg.body == "!start") {
       sessao.started = true;
-      client.sendMessage(remetente, "Olá, seja bem vindo ao bot de solicitações de serviços do Clube dos Funcionários da CSN.\nPara começar, digite !solicitacao");    
+      await client.sendMessage(remetente, "Olá, seja bem vindo ao bot de solicitações de serviços do Clube dos Funcionários da CSN.\nPara começar, digite !solicitacao");
     }
     if (sessao.started){
 
@@ -42,9 +41,14 @@ client.on('message', async msg => {
 
       if (sessao.formulario != null){
         if(sessao.formulario.aguardandoResposta){
-          sessao.formulario.responder(msg.body);
-          sessao.formulario.perguntar(client);
+          let validacao = sessao.formulario.responder(msg.body);
+            if (validacao.valid) {
+                sessao.formulario.aguardandoResposta = false;
+                sessao.formulario.perguntar(client);
+            } else client.sendMessage(remetente, validacao.msg);
         }
+        else sessao.formulario.perguntar(client);
+
         
       }
     }
