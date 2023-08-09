@@ -10,7 +10,7 @@ const client = new Client({
   authStrategy: new LocalAuth(),
 });
 
-client.on('qr', qr => {   
+client.on('qr', qr => {
     qrcode.generate(qr, {small: true});
 });
 
@@ -33,9 +33,9 @@ client.on('message', async msg => {
     }
     if (sessao.started){
 
-      if (msg.body == "!solicitacao") {
+      if (msg.body == "!solicitacao" || msg.body == "!reclamacao") {
         if (sessao.formulario == null) {
-          sessao.iniciarFormulario("solicitacao", remetente, client);
+          sessao.iniciarFormulario(msg.body.replace("!", ""), remetente, client);
         }
       }
 
@@ -43,15 +43,23 @@ client.on('message', async msg => {
         if(sessao.formulario.aguardandoResposta){
           let validacao = sessao.formulario.responder(msg.body);
             if (validacao.valid) {
-                sessao.formulario.aguardandoResposta = false;
-                sessao.formulario.perguntar(client);
+                if (sessao.formulario.formComplete) {
+                    sessao.formulario.salvarRespostas();
+                    listaSessoes.removeSessao(sessao);
+
+                    await client.sendMessage(remetente, "Obrigado por responder o formulário, em breve entraremos em contato.");
+                }
+                else{
+                    sessao.formulario.aguardandoResposta = false;
+                    sessao.formulario.perguntar(client);
+                }
             } else client.sendMessage(remetente, validacao.msg);
         }
         else sessao.formulario.perguntar(client);
 
-        
+
       }
     }
   });
-  
+
 client.initialize();

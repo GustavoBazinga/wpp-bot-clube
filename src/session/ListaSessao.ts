@@ -29,6 +29,7 @@ export default class ListaSessao {
         if (sessao == null) {
             sessao = new Sessao(id);
             listaSessoes._adicionaSessao(sessao);
+            console.log(`Nova sessão criada: ${id}`);
         }
         return sessao;
     }
