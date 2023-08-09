@@ -63,7 +63,6 @@ class Formulario {
                 this.proximaPergunta = validacao.opt.option.nextQuestionId;
             }
 
-            //TODO: Save the answer
             this.respostas.push({question: this.perguntaAtual['id'], optionId: validacao.opt['id'], answer: validacao.opt['answer']});
         }
 
@@ -171,7 +170,6 @@ class Formulario {
     }
 
     salvarRespostas() {
-        //TODO: Save the answers
         fetch('http://localhost:3001/answer', {
             method: 'POST',
             headers: {
