@@ -1,8 +1,9 @@
 import qrcode from 'qrcode-terminal';
 import { Client, LocalAuth } from 'whatsapp-web.js';
-import ListaSessao  from './session/ListaSessao';
+import SessionList  from './session/SessionList';
+import validator from 'validator';
 
-const listaSessoes = new ListaSessao();
+const listaSessoes = new SessionList();
 
 console.log('Iniciando bot...');
 
@@ -24,42 +25,26 @@ client.on('ready', () => {
 });
 
 client.on('message', async msg => {
-    const remetente = msg.from;
-    const sessao = ListaSessao.checarSessaoExisteECriar(listaSessoes, remetente);
+    const from = msg.from;
+    const session = SessionList.checkIfExistsAndCreate(listaSessoes, from);
 
-    if (msg.body == "!start") {
-      sessao.started = true;
-      await client.sendMessage(remetente, "Olá, seja bem vindo ao bot de solicitações de serviços do Clube dos Funcionários da CSN.\nPara começar, digite !solicitacao");
+    if (msg.body === '!start') {
+      await session.startChat(client);
     }
-    if (sessao.started){
 
-      if (msg.body == "!solicitacao" || msg.body == "!reclamacao") {
-        if (sessao.formulario == null) {
-          sessao.iniciarFormulario(msg.body.replace("!", ""), remetente, client);
-        }
+    if (session.form == null) {
+      if (validator.isInt(msg.body)) {
+        session.initForm(client, msg.body);
       }
+    }
+    else{
+      let response = session.form.interact(client, msg.body);
 
-      if (sessao.formulario != null){
-        if(sessao.formulario.aguardandoResposta){
-          let validacao = sessao.formulario.responder(msg.body);
-            if (validacao.valid) {
-                if (sessao.formulario.formComplete) {
-                    sessao.formulario.salvarRespostas();
-                    listaSessoes.removeSessao(sessao);
-
-                    await client.sendMessage(remetente, "Obrigado por responder o formulário, em breve entraremos em contato.");
-                }
-                else{
-                    sessao.formulario.aguardandoResposta = false;
-                    sessao.formulario.perguntar(client);
-                }
-            } else client.sendMessage(remetente, validacao.msg);
-        }
-        else sessao.formulario.perguntar(client);
-
-
+      if (response['end']){
+        session.form = null;
+        listaSessoes.delSession(session)
       }
+      console.log("ASDASD")
     }
   });
-
 client.initialize();
