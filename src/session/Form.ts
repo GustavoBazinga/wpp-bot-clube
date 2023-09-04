@@ -59,10 +59,10 @@ class Form {
     }
 
     private answer(client: Client, msg: string) {
-        let response = null;
+        let response = {};
         if (msg == '#'){
-            this.responses.pop();
-            this.currentQuestion = this.questions.find((question: any) => question.id === this.responses[this.responses.length - 1]['next_question_id']);
+            // this.responses.pop();
+            // this.currentQuestion = this.questions.find((question: any) => question.id === this.responses[this.responses.length - 1]['next_question_id']);
             return response;
         }
         if (this.currentQuestion != null) {
@@ -81,6 +81,7 @@ class Form {
                 
                 this.responses.push(response);
             } else {
+                response['end'] = false;
                 client.sendMessage(this.number, validation['message']);
             }
         }
