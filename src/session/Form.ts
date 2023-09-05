@@ -180,6 +180,7 @@ class Form {
         console.log( JSON.stringify(
             {
                 form_id: this.form['id'],
+                number : this.number,
                 responses: this.responses
             },
             null,
@@ -193,13 +194,17 @@ class Form {
             },
             body: JSON.stringify({
                 form_id: this.form['id'],
+                number : this.number,
                 responses: this.responses
             })
         })
             // .then(response => response.json())
             .then(data => {
-                console.log(data);
+                console.log('Success:', data);
             })
+            .catch((error) => {
+                console.error('Error:', error);
+        });
     }
 
     private static isDateValid(date: string): boolean {

@@ -9,6 +9,9 @@ console.log('Iniciando bot...');
 
 const client = new Client({
   authStrategy: new LocalAuth(),
+  puppeteer: {
+    headless: true,
+  },
 });
 
 client.on('qr', qr => {
@@ -22,6 +25,8 @@ client.on('loading_screen', (percent, message) => {
 
 client.on('ready', () => {
   console.log('Tudo pronto, bot iniciado!');
+  //Start new thread
+
 });
 
 client.on('message', async msg => {
@@ -47,4 +52,27 @@ client.on('message', async msg => {
       console.log("ASDASD")
     }
   });
+
+client.on('disconnected', (reason) => {
+  console.log('Client was logged out', reason);
+});
+
 client.initialize();
+
+import express from 'express';
+const app = express();
+const port = 3000;
+
+app.use(express.json());
+
+app.post('/sendMessage', (req, res) => {
+  const { number, message } = req.body;
+  const numberCompleted = number;
+  client.sendMessage(numberCompleted, message);
+  res.send('Mensagem enviada com sucesso!');
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
+});
+
