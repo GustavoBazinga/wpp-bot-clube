@@ -60,31 +60,30 @@ class Form {
 
     private answer(client: Client, msg: string) {
         let response = {};
+        
         if (msg == '#'){
-            // this.responses.pop();
-            // this.currentQuestion = this.questions.find((question: any) => question.id === this.responses[this.responses.length - 1]['next_question_id']);
+            this.currentQuestion = this.questions.find((question: any) => question.id === this.responses[this.responses.length - 1]['question']['id']);
+            this.responses.pop();
+
             return response;
         }
         if (this.currentQuestion != null) {
             let validation = this.validate(msg);
             if (validation['valid']) {
-                let question = this.currentQuestion
+                let question = Object.assign({}, this.currentQuestion);
                 delete question['options']
+                this.currentQuestion = this.questions.find((question: any) => question.id === validation['next_question_id']);
                 response = {
                     question: question,
-                    answer: validation['answer']
+                    answer: validation['answer'],
                 }
-
-                console.log(response)
-                
-                this.currentQuestion = this.questions.find((question: any) => question.id === validation['next_question_id']);
-                
                 this.responses.push(response);
             } else {
                 response['end'] = false;
                 client.sendMessage(this.number, validation['message']);
             }
         }
+
         return response;
     }
 
@@ -177,15 +176,6 @@ class Form {
     }
 
     private save(){
-        console.log( JSON.stringify(
-            {
-                form_id: this.form['id'],
-                number : this.number,
-                responses: this.responses
-            },
-            null,
-            2
-        ));
         //If response is null, call API to save response
         fetch(`http://192.168.100.20/api/form/response`, {
             method: 'POST',
@@ -217,7 +207,7 @@ class Form {
         const [day, month, year] = date.split('/');
         const numericDay = parseInt(day, 10);
         const numericMonth = parseInt(month, 10);
-        const numericYear = parseInt(year, 10);console.log(numericDay, numericMonth, numericYear);
+        const numericYear = parseInt(year, 10);
 
         if ((numericMonth === 4 || numericMonth === 6 || numericMonth === 9 || numericMonth === 11) && numericDay === 31) {
             return false;

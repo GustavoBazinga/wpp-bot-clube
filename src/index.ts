@@ -5,13 +5,9 @@ import validator from 'validator';
 
 const listaSessoes = new SessionList();
 
-console.log('Iniciando bot...');
 
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: {
-    headless: true,
-  },
 });
 
 client.on('qr', qr => {
@@ -29,6 +25,11 @@ client.on('ready', () => {
 
 });
 
+client.on('change_state', (state) => {
+  console.log('Estado mudou!');
+  console.log(state);
+});
+
 client.on('message', async msg => {
     const from = msg.from;
     const session = SessionList.checkIfExistsAndCreate(listaSessoes, from);
@@ -44,12 +45,10 @@ client.on('message', async msg => {
     }
     else{
       let response = session.form.interact(client, msg.body);
-
       if (response['end']){
         session.form = null;
         listaSessoes.delSession(session)
       }
-      console.log("ASDASD")
     }
   });
 
@@ -60,16 +59,30 @@ client.on('disconnected', (reason) => {
 client.initialize();
 
 import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
 const app = express();
 const port = 3000;
 
-app.use(express.json());
+app.use(cors());
+app.use(bodyParser.json());
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
 app.post('/sendMessage', (req, res) => {
-  const { number, message } = req.body;
-  const numberCompleted = number;
-  client.sendMessage(numberCompleted, message);
-  res.send('Mensagem enviada com sucesso!');
+  try{
+    const { number, message } = req.body;
+    client.sendMessage(number, message);
+    res.send('Mensagem enviada!').status(200);
+  }
+  catch (err){
+    console.log("====================================");
+    console.log(err);
+    console.log("====================================");
+  }
+
 });
 
 app.listen(port, () => {
